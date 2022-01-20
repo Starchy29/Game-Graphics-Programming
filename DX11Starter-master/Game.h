@@ -3,6 +3,8 @@
 #include "DXCore.h"
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
+#include "Mesh.h"
+#include <memory>
 
 class Game 
 	: public DXCore
@@ -20,6 +22,9 @@ public:
 	void Draw(float deltaTime, float totalTime);
 
 private:
+	std::shared_ptr<Mesh> triangle;
+	std::shared_ptr<Mesh> square;
+	std::shared_ptr<Mesh> pentagon;
 
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
