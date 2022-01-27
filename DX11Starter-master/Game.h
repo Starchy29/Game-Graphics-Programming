@@ -25,6 +25,7 @@ private:
 	std::shared_ptr<Mesh> triangle;
 	std::shared_ptr<Mesh> square;
 	std::shared_ptr<Mesh> pentagon;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBufferVS;
 
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
