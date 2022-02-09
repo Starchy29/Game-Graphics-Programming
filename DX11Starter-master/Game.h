@@ -5,6 +5,8 @@
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 #include "Mesh.h"
 #include <memory>
+#include <vector>
+#include "Entity.h"
 
 class Game 
 	: public DXCore
@@ -26,6 +28,7 @@ private:
 	std::shared_ptr<Mesh> square;
 	std::shared_ptr<Mesh> pentagon;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBufferVS;
+	std::vector<Entity*> entities;
 
 	// Should we use vsync to limit the frame rate?
 	bool vsync;

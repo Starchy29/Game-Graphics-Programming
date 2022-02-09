@@ -46,7 +46,9 @@ Game::~Game()
 	// we don't need to explicitly clean up those DirectX objects
 	// - If we weren't using smart pointers, we'd need
 	//   to call Release() on each DirectX object created in Game
-
+	for (Entity* entity : entities) {
+		delete entity;
+	}
 }
 
 // --------------------------------------------------------
@@ -208,6 +210,22 @@ void Game::CreateBasicGeometry()
 	};
 	unsigned int indices3[] = { 0, 2, 1, 3, 2, 0, 3, 4, 2 };
 	pentagon = std::make_shared<Mesh>(vertices3, 5, indices3, 9, device, context);
+
+	entities = std::vector<Entity*>();
+	Entity* square1 = new Entity(square);
+	entities.push_back(square1);
+
+	Entity* square2 = new Entity(square);
+	entities.push_back(square2);
+
+	Entity* triangle1 = new Entity(triangle);
+	entities.push_back(triangle1);
+
+	Entity* triangle2 = new Entity(triangle);
+	entities.push_back(triangle2);
+
+	Entity* pentagonEnt = new Entity(pentagon);
+	entities.push_back(pentagonEnt);
 }
 
 
@@ -229,6 +247,11 @@ void Game::Update(float deltaTime, float totalTime)
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
+
+	for(Entity* entity : entities) {
+		entity->GetTransform()->MoveAbsolute(0.1f * deltaTime, 0.0f, 0.0f);
+		entity->GetTransform()->Rotate(0.0f, 0.0f, 0.1f * deltaTime);
+	}
 }
 
 // --------------------------------------------------------
@@ -266,9 +289,11 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->IASetInputLayout(inputLayout.Get());
 
 	// set up constant vertex shader
-	VertexShaderExternalData vsData;  
-	vsData.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);  
-	vsData.offset = XMFLOAT3(0.25f, 0.0f, 0.0f);
+	/*VertexShaderExternalData vsData;
+	vsData.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
+	XMFLOAT4X4 matrix;
+	XMStoreFloat4x4(&matrix, XMMatrixIdentity());
+	vsData.worldMatrix = matrix;
 
 	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
 	context->Map(constantBufferVS.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
@@ -279,9 +304,13 @@ void Game::Draw(float deltaTime, float totalTime)
 		1, // How many are we activating?  Can do multiple at once  
 		constantBufferVS.GetAddressOf());  // Array of buffers (or the address of one)
 
-	triangle.get()->Draw();
-	square.get()->Draw();
-	pentagon.get()->Draw();
+	/*triangle->Draw();
+	square->Draw();
+	pentagon->Draw();*/
+
+	for(Entity* entity : entities) {
+		entity->Draw(context, constantBufferVS);
+	}
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
