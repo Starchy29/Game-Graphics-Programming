@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include "Entity.h"
+#include "Camera.h"
 
 class Game 
 	: public DXCore
@@ -29,6 +30,7 @@ private:
 	std::shared_ptr<Mesh> pentagon;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBufferVS;
 	std::vector<Entity*> entities;
+	std::shared_ptr<Camera> worldCam;
 
 	// Should we use vsync to limit the frame rate?
 	bool vsync;

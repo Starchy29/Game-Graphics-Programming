@@ -79,6 +79,8 @@ void Game::Init()
 	cbDesc.Usage    = D3D11_USAGE_DYNAMIC;
 
 	device->CreateBuffer(&cbDesc, 0, constantBufferVS.GetAddressOf());
+
+	worldCam = std::make_shared<Camera>((float)this->width / this->height, XMFLOAT3(0, 0, -5));
 }
 
 // --------------------------------------------------------
@@ -237,6 +239,9 @@ void Game::OnResize()
 {
 	// Handle base-level DX resize stuff
 	DXCore::OnResize();
+	if(worldCam != nullptr) {
+		worldCam->UpdateProjectionMatrix((float)this->width / this->height);
+	}
 }
 
 // --------------------------------------------------------
@@ -247,6 +252,8 @@ void Game::Update(float deltaTime, float totalTime)
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
+
+	worldCam->Update(deltaTime);
 
 	for(Entity* entity : entities) {
 		entity->GetTransform()->MoveAbsolute(0.1f * deltaTime, 0.0f, 0.0f);
@@ -309,7 +316,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	pentagon->Draw();*/
 
 	for(Entity* entity : entities) {
-		entity->Draw(context, constantBufferVS);
+		entity->Draw(context, constantBufferVS, worldCam);
 	}
 
 	// Present the back buffer to the user
