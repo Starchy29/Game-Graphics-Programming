@@ -8,6 +8,8 @@
 #include <vector>
 #include "Entity.h"
 #include "Camera.h"
+#include "SimpleShader.h"
+#include "Material.h"
 
 class Game 
 	: public DXCore
@@ -28,9 +30,11 @@ private:
 	std::shared_ptr<Mesh> triangle;
 	std::shared_ptr<Mesh> square;
 	std::shared_ptr<Mesh> pentagon;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBufferVS;
 	std::vector<Entity*> entities;
 	std::shared_ptr<Camera> worldCam;
+	std::shared_ptr<Material> blue;
+	std::shared_ptr<Material> red;
+	std::shared_ptr<Material> green;
 
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
@@ -49,9 +53,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 	
 	// Shaders and shader-related constructs
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+	std::shared_ptr<SimplePixelShader> pixelShader;
+	std::shared_ptr<SimpleVertexShader> vertexShader;
 
 };
 
