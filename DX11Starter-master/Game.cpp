@@ -92,8 +92,8 @@ void Game::Init()
 void Game::LoadShaders()
 {
 	vertexShader = std::make_shared<SimpleVertexShader>(device, context, GetFullPathTo_Wide(L"VertexShader.cso").c_str());
-	pixelShader = std::make_shared<SimplePixelShader>(device, context,
-	GetFullPathTo_Wide(L"PixelShader.cso").c_str());
+	pixelShader = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"PixelShader.cso").c_str());
+	customPixelShader = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"CustomPS.cso").c_str());
 }
 
 
@@ -105,73 +105,26 @@ void Game::CreateBasicGeometry()
 	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 
-	// Set up the vertices of the triangle we would like to draw
-	// - We're going to copy this array, exactly as it exists in memory
-	//    over to a DirectX-controlled data structure (the vertex buffer)
-	// - Note: Since we don't have a camera or really any concept of
-	//    a "3d world" yet, we're simply describing positions within the
-	//    bounds of how the rasterizer sees our screen: [-1 to +1] on X and Y
-	// - This means (0,0) is at the very center of the screen.
-	// - These are known as "Normalized Device Coordinates" or "Homogeneous 
-	//    Screen Coords", which are ways to describe a position without
-	//    knowing the exact size (in pixels) of the image/window/etc.  
-	// - Long story short: Resizing the window also resizes the triangle,
-	//    since we're describing the triangle in terms of the window itself
-	Vertex vertices[] =
-	{
-		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), red },
-		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
-		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), green },
-	};
-
-	// Set up the indices, which tell us which vertices to use and in which order
-	// - This is somewhat redundant for just 3 vertices (it's a simple example)
-	// - Indices are technically not required if the vertices are in the buffer 
-	//    in the correct order and each one will be used exactly once
-	// - But just to see how it's done...
-	unsigned int indices[] = { 0, 1, 2 };
-	triangle = std::make_shared<Mesh>(vertices, 3, indices, 3, device, context);
-
-	Vertex vertices2[] = {
-		{ XMFLOAT3(+0.9f, +0.9f, +0.0f), red },
-		{ XMFLOAT3(+0.9f, -0.5f, +0.0f), blue },
-		{ XMFLOAT3(+0.8f, -0.5f, +0.0f), green },
-		{ XMFLOAT3(+0.8f, +0.9f, +0.0f), green }
-	};
-	unsigned int indices2[] = { 0, 1, 3, 3, 1, 2 };
-	square = std::make_shared<Mesh>(vertices2, 4, indices2, 6, device, context);
-
-	Vertex vertices3[] = {
-		{ XMFLOAT3(-0.9f, +0.5f, +0.0f), red },
-		{ XMFLOAT3(-0.9f, -0.5f, +0.0f), blue },
-		{ XMFLOAT3(-0.8f, -0.5f, +0.0f), green },
-		{ XMFLOAT3(-0.8f, +0.5f, +0.0f), green },
-		{ XMFLOAT3(-0.7f, +0.0f, +0.0f), blue }
-	};
-	unsigned int indices3[] = { 0, 2, 1, 3, 2, 0, 3, 4, 2 };
-	pentagon = std::make_shared<Mesh>(vertices3, 5, indices3, 9, device, context);
+	// Load Models
+	sphere = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device, context);
+	cube = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device, context);
+	spiral = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/helix.obj").c_str(), device, context);
 
 	this->blue = std::make_shared<Material>(blue, vertexShader, pixelShader);
 	this->red = std::make_shared<Material>(red, vertexShader, pixelShader);
-	this->green = std::make_shared<Material>(green, vertexShader, pixelShader);
+	this->green = std::make_shared<Material>(green, vertexShader, customPixelShader);
 
 	entities = std::vector<Entity*>();
-	Entity* square1 = new Entity(square, this->red);
-	entities.push_back(square1);
+	Entity* cubeEntity = new Entity(cube, this->red);
+	cubeEntity->GetTransform()->MoveAbsolute(-5, 0, 0);
+	entities.push_back(cubeEntity);
 
-	Entity* square2 = new Entity(square, this->blue);
-	square2->GetTransform()->MoveAbsolute(5, 0, 0);
-	entities.push_back(square2);
+	Entity* sphereEntity = new Entity(sphere, this->blue);
+	entities.push_back(sphereEntity);
 
-	Entity* triangle1 = new Entity(triangle, this->green);
-	entities.push_back(triangle1);
-
-	Entity* triangle2 = new Entity(triangle, this->red);
-	triangle2->GetTransform()->MoveAbsolute(5, 0, 0);
-	entities.push_back(triangle2);
-
-	Entity* pentagonEnt = new Entity(pentagon, this->blue);
-	entities.push_back(pentagonEnt);
+	Entity* spiralEntity = new Entity(spiral, this->green);
+	spiralEntity->GetTransform()->MoveAbsolute(5, 0, 0);
+	entities.push_back(spiralEntity);
 }
 
 

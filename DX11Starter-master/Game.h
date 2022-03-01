@@ -27,9 +27,9 @@ public:
 	void Draw(float deltaTime, float totalTime);
 
 private:
-	std::shared_ptr<Mesh> triangle;
-	std::shared_ptr<Mesh> square;
-	std::shared_ptr<Mesh> pentagon;
+	std::shared_ptr<Mesh> cube;
+	std::shared_ptr<Mesh> sphere;
+	std::shared_ptr<Mesh> spiral;
 	std::vector<Entity*> entities;
 	std::shared_ptr<Camera> worldCam;
 	std::shared_ptr<Material> blue;
@@ -55,6 +55,7 @@ private:
 	// Shaders and shader-related constructs
 	std::shared_ptr<SimplePixelShader> pixelShader;
 	std::shared_ptr<SimpleVertexShader> vertexShader;
+	std::shared_ptr<SimplePixelShader> customPixelShader;
 
 };
 
