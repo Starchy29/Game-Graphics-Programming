@@ -32,6 +32,8 @@ Game::Game(HINSTANCE hInstance)
 	CreateConsoleWindow(500, 120, 32, 120);
 	printf("Console window created successfully.  Feel free to printf() here.\n");
 #endif
+
+	ambientColor = DirectX::XMFLOAT3(0.2f, 0.2f, 0.2f);
 }
 
 // --------------------------------------------------------
@@ -67,18 +69,39 @@ void Game::Init()
 	// Essentially: "What kind of shape should the GPU draw with our data?"
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	// Get size as the next multiple of 16 (instead of hardcoding a size here!) 
-	//unsigned int size = sizeof(VertexShaderExternalData);
-	//size = (size + 15) / 16 * 16; // This will work even if your struct size changes
-
-	// Describe the constant buffer  
-	/*D3D11_BUFFER_DESC cbDesc = {}; // Sets struct to all zeros  
-	cbDesc.BindFlags  = D3D11_BIND_CONSTANT_BUFFER;
-	cbDesc.ByteWidth  = size; // Must be a multiple of 16  
-	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;  
-	cbDesc.Usage    = D3D11_USAGE_DYNAMIC;*/
-
 	worldCam = std::make_shared<Camera>((float)this->width / this->height, XMFLOAT3(0, 0, -5));
+
+	dirLight = {};
+	dirLight.type = LIGHT_TYPE_DIRECTIONAL;
+	dirLight.direction = XMFLOAT3(1.0f, 0.0, 0.0);
+	dirLight.color = XMFLOAT3(1.0f, 1.0, 1.0);
+	dirLight.intensity = 1;
+
+	redLight = {};
+	redLight.type = LIGHT_TYPE_DIRECTIONAL;
+	redLight.direction = XMFLOAT3(-1.0f, 0.0, 0.0);
+	redLight.color = XMFLOAT3(1.0f, 0.0, 0.0);
+	redLight.intensity = 1;
+
+	greenLight = {};
+	greenLight.type = LIGHT_TYPE_DIRECTIONAL;
+	greenLight.direction = XMFLOAT3(0.0f, 1.0, 0.0);
+	greenLight.color = XMFLOAT3(0.0f, 1.0, 0.0);
+	greenLight.intensity = 1;
+
+	bluePoint = {};
+	bluePoint.type = LIGHT_TYPE_POINT;
+	bluePoint.position = XMFLOAT3(1.0f, 3.0, 0.0);
+	bluePoint.color = XMFLOAT3(0.0f, 0.0, 1.0);
+	bluePoint.intensity = 1;
+	bluePoint.range = 20;
+
+	yellowPoint = {};
+	yellowPoint.type = LIGHT_TYPE_POINT;
+	yellowPoint.position = XMFLOAT3(-2.0f, -3.0, 0.0);
+	yellowPoint.color = XMFLOAT3(1.0f, 1.0, 0.0);
+	yellowPoint.intensity = 1;
+	yellowPoint.range = 10;
 }
 
 // --------------------------------------------------------
@@ -104,15 +127,16 @@ void Game::CreateBasicGeometry()
 	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	XMFLOAT4 white = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// Load Models
 	sphere = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device, context);
 	cube = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device, context);
 	spiral = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/helix.obj").c_str(), device, context);
 
-	this->blue = std::make_shared<Material>(blue, vertexShader, pixelShader);
-	this->red = std::make_shared<Material>(red, vertexShader, pixelShader);
-	this->green = std::make_shared<Material>(green, vertexShader, customPixelShader);
+	this->blue = std::make_shared<Material>(white, vertexShader, pixelShader, 0.5f);
+	this->red = std::make_shared<Material>(white, vertexShader, pixelShader, 0.5f);
+	this->green = std::make_shared<Material>(white, vertexShader, pixelShader, 0.5f);
 
 	entities = std::vector<Entity*>();
 	Entity* cubeEntity = new Entity(cube, this->red);
@@ -153,7 +177,6 @@ void Game::Update(float deltaTime, float totalTime)
 	worldCam->Update(deltaTime);
 
 	for(Entity* entity : entities) {
-		entity->GetTransform()->MoveAbsolute(0.1f * deltaTime, 0.0f, 0.0f);
 		entity->GetTransform()->Rotate(0.0f, 0.0f, 0.1f * deltaTime);
 	}
 }
@@ -176,15 +199,33 @@ void Game::Draw(float deltaTime, float totalTime)
 		1.0f,
 		0);
 
+	pixelShader->SetData(
+		"directionalLight1",   // The name of the (eventual) variable in the shader 
+		&dirLight,   // The address of the data to set 
+		sizeof(Light));  // The size of the data (the whole struct!) to set
 
-	// Ensure the pipeline knows how to interpret the data (numbers)
-	// from the vertex buffer.  
-	// - If all of your 3D models use the exact same vertex layout,
-	//    this could simply be done once in Init()
-	// - However, this isn't always the case (but might be for this course)
-	//context->IASetInputLayout(inputLayout.Get());
+	pixelShader->SetData(
+		"redLight",   // The name of the (eventual) variable in the shader 
+		&redLight,   // The address of the data to set 
+		sizeof(Light));  // The size of the data (the whole struct!) to set
+
+	pixelShader->SetData(
+		"greenLight",   // The name of the (eventual) variable in the shader 
+		&greenLight,   // The address of the data to set 
+		sizeof(Light));  // The size of the data (the whole struct!) to set
+
+	pixelShader->SetData(
+		"bluePoint",   // The name of the (eventual) variable in the shader 
+		&bluePoint,   // The address of the data to set 
+		sizeof(Light));  // The size of the data (the whole struct!) to set
+
+	pixelShader->SetData(
+		"yellowPoint",   // The name of the (eventual) variable in the shader 
+		&yellowPoint,   // The address of the data to set 
+		sizeof(Light));  // The size of the data (the whole struct!) to set
 
 	for(Entity* entity : entities) {
+		entity->GetMaterial()->GetPixelShader()->SetFloat3("ambient", ambientColor);
 		entity->Draw(context, worldCam);
 	}
 

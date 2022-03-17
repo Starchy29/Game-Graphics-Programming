@@ -12,7 +12,8 @@ Entity::Entity(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material)
 void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::shared_ptr<Camera> camera)
 {
 	std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
-	vs->SetMatrix4x4("world", transform.GetWorldMatrix()); 
+	vs->SetMatrix4x4("world", transform.GetWorldMatrix());
+	vs->SetMatrix4x4("worldInverseTranspose", transform.GetWorldInverseTransposeMatrix());
 	vs->SetMatrix4x4("view", camera->GetView()); 
 	vs->SetMatrix4x4("projection", camera->GetProjection()); 
 
@@ -20,6 +21,8 @@ void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::shar
 
 	std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
 	ps->SetFloat4("colorTint", material->GetTint());
+	ps->SetFloat3("cameraPosition", camera->GetPosition());
+	ps->SetFloat("roughness", material->GetRoughness());
 
 	ps->CopyAllBufferData();
 
@@ -37,4 +40,9 @@ Transform* Entity::GetTransform()
 std::shared_ptr<Mesh> Entity::GetMesh()
 {
 	return mesh;
+}
+
+std::shared_ptr<Material> Entity::GetMaterial()
+{
+	return material;
 }

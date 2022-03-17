@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "SimpleShader.h"
 #include "Material.h"
+#include "Lights.h"
 
 class Game 
 	: public DXCore
@@ -35,6 +36,12 @@ private:
 	std::shared_ptr<Material> blue;
 	std::shared_ptr<Material> red;
 	std::shared_ptr<Material> green;
+	DirectX::XMFLOAT3 ambientColor;
+	Light dirLight;
+	Light redLight;
+	Light greenLight;
+	Light bluePoint;
+	Light yellowPoint;
 
 	// Should we use vsync to limit the frame rate?
 	bool vsync;

@@ -10,6 +10,7 @@ public:
 
 	DirectX::XMFLOAT4X4 GetView();
 	DirectX::XMFLOAT4X4 GetProjection();
+	DirectX::XMFLOAT3 GetPosition();
 
 private:
 	Transform transform;

@@ -65,3 +65,8 @@ DirectX::XMFLOAT4X4 Camera::GetProjection()
 {
 	return projection;
 }
+
+DirectX::XMFLOAT3 Camera::GetPosition()
+{
+	return transform.GetPosition();
+}
