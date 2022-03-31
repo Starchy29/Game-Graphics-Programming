@@ -23,6 +23,10 @@ void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::shar
 	ps->SetFloat4("colorTint", material->GetTint());
 	ps->SetFloat3("cameraPosition", camera->GetPosition());
 	ps->SetFloat("roughness", material->GetRoughness());
+	ps->SetFloat("uvScale", material->GetUVScale());
+
+	for (auto& t : material->GetTextureSRVs()) { ps->SetShaderResourceView(t.first.c_str(), t.second); }
+	for (auto& s : material->GetSamplers()) { ps->SetSamplerState(s.first.c_str(), s.second); }
 
 	ps->CopyAllBufferData();
 

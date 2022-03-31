@@ -64,5 +64,7 @@ private:
 	std::shared_ptr<SimpleVertexShader> vertexShader;
 	std::shared_ptr<SimplePixelShader> customPixelShader;
 
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+
 };
 

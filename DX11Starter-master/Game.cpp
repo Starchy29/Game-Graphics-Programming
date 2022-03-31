@@ -2,6 +2,7 @@
 #include "Vertex.h"
 #include "Input.h"
 #include <memory>
+#include <WICTextureLoader.h>
 
 // Needed for a helper function to read compiled shader files from the hard drive
 #pragma comment(lib, "d3dcompiler.lib")
@@ -134,9 +135,39 @@ void Game::CreateBasicGeometry()
 	cube = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device, context);
 	spiral = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/helix.obj").c_str(), device, context);
 
+	// load textures
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brick;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> stone;
+
+	CreateWICTextureFromFile(device.Get(), context.Get(), 
+		GetFullPathTo_Wide(L"../../Assets/Textures/brick wall/brick_wall_001_diffuse_4k.jpg").c_str(), nullptr, brick.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), 
+		GetFullPathTo_Wide(L"../../Assets/Textures/boulder/rock_boulder_dry_disp_4k.png").c_str(), nullptr, stone.GetAddressOf());
+
+	// create sampler
+	D3D11_SAMPLER_DESC samplerDescription = {};
+	samplerDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDescription.MaxAnisotropy = 8;
+	samplerDescription.MaxLOD = D3D11_FLOAT32_MAX;
+
+	device.Get()->CreateSamplerState(&samplerDescription, samplerState.GetAddressOf());
+
 	this->blue = std::make_shared<Material>(white, vertexShader, pixelShader, 0.5f);
 	this->red = std::make_shared<Material>(white, vertexShader, pixelShader, 0.5f);
 	this->green = std::make_shared<Material>(white, vertexShader, pixelShader, 0.5f);
+	
+	this->green.get()->AddSampler("DefaultSampler", samplerState.Get());
+	this->blue.get()->AddSampler("DefaultSampler", samplerState.Get());
+	this->red.get()->AddSampler("DefaultSampler", samplerState.Get());
+
+	this->red.get()->AddTextureSRV("SurfaceTexture", brick.Get());
+	this->green.get()->AddTextureSRV("SurfaceTexture", brick.Get());
+	this->blue.get()->AddTextureSRV("SurfaceTexture", stone.Get());
+
+	this->red.get()->SetUVScale(4.0f);
 
 	entities = std::vector<Entity*>();
 	Entity* cubeEntity = new Entity(cube, this->red);
