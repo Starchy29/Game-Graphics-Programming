@@ -15,12 +15,21 @@ cbuffer ExternalData : register(b0) {
 }
 
 Texture2D SurfaceTexture : register(t0); // "t" registers for textures
+Texture2D NormalMap : register(t1);
 SamplerState DefaultSampler : register(s0); // "s" registers for samplers
 
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
+	float3 unpackedNormal = NormalMap.Sample(DefaultSampler, input.uv).rgb * 2 - 1;
+
 	input.normal = normalize(input.normal);
+	input.tangent = normalize(input.tangent);
+	input.tangent = normalize(input.tangent - input.normal * dot(input.tangent, input.normal)); // Gram-Schmidt assumes T&N are normalized!
+	float3 biTangent = cross(input.tangent, input.normal);
+	float3x3 TBN = float3x3(input.tangent, biTangent, input.normal);
+	input.normal = mul(unpackedNormal, TBN); // Note multiplication order!
+
 	input.uv.x *= uvScale;
 	input.uv.y *= uvScale;
 	float3 view = normalize(cameraPosition - input.worldPosition);

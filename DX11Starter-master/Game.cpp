@@ -3,6 +3,7 @@
 #include "Input.h"
 #include <memory>
 #include <WICTextureLoader.h>
+#include <DDSTextureLoader.h>
 
 // Needed for a helper function to read compiled shader files from the hard drive
 #pragma comment(lib, "d3dcompiler.lib")
@@ -117,6 +118,8 @@ void Game::LoadShaders()
 {
 	vertexShader = std::make_shared<SimpleVertexShader>(device, context, GetFullPathTo_Wide(L"VertexShader.cso").c_str());
 	pixelShader = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"PixelShader.cso").c_str());
+	skyVertexShader = std::make_shared<SimpleVertexShader>(device, context, GetFullPathTo_Wide(L"SkyVertexShader.cso").c_str());
+	skyPixelShader = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"SkyPixelShader.cso").c_str());
 	customPixelShader = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"CustomPS.cso").c_str());
 }
 
@@ -138,11 +141,20 @@ void Game::CreateBasicGeometry()
 	// load textures
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brick;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> stone;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brickNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> stoneNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> skyBox;
 
 	CreateWICTextureFromFile(device.Get(), context.Get(), 
-		GetFullPathTo_Wide(L"../../Assets/Textures/brick wall/brick_wall_001_diffuse_4k.jpg").c_str(), nullptr, brick.GetAddressOf());
+		GetFullPathTo_Wide(L"../../Assets/Textures/Textures With Normal Maps/cobblestone.png").c_str(), nullptr, brick.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), 
-		GetFullPathTo_Wide(L"../../Assets/Textures/boulder/rock_boulder_dry_disp_4k.png").c_str(), nullptr, stone.GetAddressOf());
+		GetFullPathTo_Wide(L"../../Assets/Textures/Textures With Normal Maps/rock.png").c_str(), nullptr, stone.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(),
+		GetFullPathTo_Wide(L"../../Assets/Textures/Textures With Normal Maps/cobblestone_normals.png").c_str(), nullptr, brickNormal.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(),
+		GetFullPathTo_Wide(L"../../Assets/Textures/Textures With Normal Maps/rock_normals.png").c_str(), nullptr, stoneNormal.GetAddressOf());
+	CreateDDSTextureFromFile(device.Get(), context.Get(), 
+		GetFullPathTo_Wide(L"../../Assets/Textures/Skies/SunnyCubeMap.dds").c_str(), nullptr, skyBox.GetAddressOf());
 
 	// create sampler
 	D3D11_SAMPLER_DESC samplerDescription = {};
@@ -166,6 +178,9 @@ void Game::CreateBasicGeometry()
 	this->red.get()->AddTextureSRV("SurfaceTexture", brick.Get());
 	this->green.get()->AddTextureSRV("SurfaceTexture", brick.Get());
 	this->blue.get()->AddTextureSRV("SurfaceTexture", stone.Get());
+	this->red.get()->AddTextureSRV("NormalMap", brickNormal.Get());
+	this->green.get()->AddTextureSRV("NormalMap", brickNormal.Get());
+	this->blue.get()->AddTextureSRV("NormalMap", stoneNormal.Get());
 
 	this->red.get()->SetUVScale(4.0f);
 
@@ -180,6 +195,8 @@ void Game::CreateBasicGeometry()
 	Entity* spiralEntity = new Entity(spiral, this->green);
 	spiralEntity->GetTransform()->MoveAbsolute(5, 0, 0);
 	entities.push_back(spiralEntity);
+
+	sky = new Sky(cube, samplerState, device, skyVertexShader, skyPixelShader, skyBox);
 }
 
 
@@ -259,6 +276,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		entity->GetMaterial()->GetPixelShader()->SetFloat3("ambient", ambientColor);
 		entity->Draw(context, worldCam);
 	}
+
+	sky->Draw(context, worldCam);
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it

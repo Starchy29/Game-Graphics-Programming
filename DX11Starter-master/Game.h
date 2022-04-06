@@ -11,6 +11,7 @@
 #include "SimpleShader.h"
 #include "Material.h"
 #include "Lights.h"
+#include "Sky.h"
 
 class Game 
 	: public DXCore
@@ -63,8 +64,11 @@ private:
 	std::shared_ptr<SimplePixelShader> pixelShader;
 	std::shared_ptr<SimpleVertexShader> vertexShader;
 	std::shared_ptr<SimplePixelShader> customPixelShader;
+	std::shared_ptr<SimplePixelShader> skyPixelShader;
+	std::shared_ptr<SimpleVertexShader> skyVertexShader;
 
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 
+	Sky* sky;
 };
 

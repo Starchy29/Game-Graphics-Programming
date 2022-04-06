@@ -11,6 +11,7 @@ struct VertexShaderInput
 { 
 	float3 localPosition: POSITION; // XYZ position
 	float3 normal: NORMAL;
+	float3 tangent: TANGENT;
 	float2 uv: TEXCOORD;
 };
 
@@ -23,6 +24,7 @@ VertexToPixel main( VertexShaderInput input )
 	matrix wvp = mul(projection, mul(view, world));  
 	output.screenPosition = mul(wvp, float4(input.localPosition, 1.0f));
 	output.normal = mul((float3x3)worldInverseTranspose, input.normal);
+	output.tangent = mul((float3x3)worldInverseTranspose, input.tangent);
 	output.worldPosition = mul(world, float4(input.localPosition, 1)).xyz;
 
 	// Pass the color through 

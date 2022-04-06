@@ -33,11 +33,11 @@ void Camera::Update(float dt)
 		transform.Rotate(sensitivity * cursorMovementY * dt, sensitivity * cursorMovementX * dt, 0);
 
 		// limit vertical to straight up and down
-		if(transform.GetPitchYawRoll().y > XM_PIDIV2) {
-			transform.SetPitchYawRoll(transform.GetPitchYawRoll().x, XM_PIDIV2, transform.GetPitchYawRoll().z);
+		if(transform.GetPitchYawRoll().x > XM_PIDIV2) {
+			transform.SetPitchYawRoll(XM_PIDIV2, transform.GetPitchYawRoll().y, transform.GetPitchYawRoll().z);
 		}
-		else if(transform.GetPitchYawRoll().y < -XM_PIDIV2) {
-			transform.SetPitchYawRoll(transform.GetPitchYawRoll().x, -XM_PIDIV2, transform.GetPitchYawRoll().z);
+		else if(transform.GetPitchYawRoll().x < -XM_PIDIV2) {
+			transform.SetPitchYawRoll(-XM_PIDIV2, transform.GetPitchYawRoll().y, transform.GetPitchYawRoll().z);
 		}
 	}
 
