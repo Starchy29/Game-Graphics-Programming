@@ -41,6 +41,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 	float4 green = Directional(greenLight, view, input.normal, roughness, surfaceColor);
 	float4 blue = Point(bluePoint, view, input.normal, roughness, surfaceColor, input.worldPosition);
 	float4 yellow = Point(yellowPoint, view, input.normal, roughness, surfaceColor, input.worldPosition);
+	float4 totalColor = first + red + green + blue + yellow + float4(ambient, 1) * surfaceColor;
 
-	return first + red + green + blue + yellow + float4(ambient, 1) * surfaceColor;
+	return float4(pow(totalColor, 1.0f / 2.2f).rgb, 1);
 }
