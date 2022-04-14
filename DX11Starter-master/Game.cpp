@@ -139,20 +139,36 @@ void Game::CreateBasicGeometry()
 	spiral = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/helix.obj").c_str(), device, context);
 
 	// load textures
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brick;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> stone;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brickNormal;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> stoneNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronze;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeRoughness;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeMetal;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestone;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneRoughness;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneMetal;
+
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> skyBox;
 
 	CreateWICTextureFromFile(device.Get(), context.Get(), 
-		GetFullPathTo_Wide(L"../../Assets/Textures/Textures With Normal Maps/cobblestone.png").c_str(), nullptr, brick.GetAddressOf());
+		GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_albedo.png").c_str(), nullptr, bronze.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), 
-		GetFullPathTo_Wide(L"../../Assets/Textures/Textures With Normal Maps/rock.png").c_str(), nullptr, stone.GetAddressOf());
+		GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_normals.png").c_str(), nullptr, bronzeNormal.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(),
-		GetFullPathTo_Wide(L"../../Assets/Textures/Textures With Normal Maps/cobblestone_normals.png").c_str(), nullptr, brickNormal.GetAddressOf());
+		GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_roughness.png").c_str(), nullptr, bronzeRoughness.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(),
-		GetFullPathTo_Wide(L"../../Assets/Textures/Textures With Normal Maps/rock_normals.png").c_str(), nullptr, stoneNormal.GetAddressOf());
+		GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_metal.png").c_str(), nullptr, bronzeMetal.GetAddressOf());
+
+	CreateWICTextureFromFile(device.Get(), context.Get(),
+		GetFullPathTo_Wide(L"../../Assets/Textures/PBR/cobblestone_albedo.png").c_str(), nullptr, cobblestone.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(),
+		GetFullPathTo_Wide(L"../../Assets/Textures/PBR/cobblestone_normals.png").c_str(), nullptr, cobblestoneNormal.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(),
+		GetFullPathTo_Wide(L"../../Assets/Textures/PBR/cobblestone_roughness.png").c_str(), nullptr, cobblestoneRoughness.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(),
+		GetFullPathTo_Wide(L"../../Assets/Textures/PBR/cobblestone_metal.png").c_str(), nullptr, cobblestoneMetal.GetAddressOf());
+	
 	CreateDDSTextureFromFile(device.Get(), context.Get(), 
 		GetFullPathTo_Wide(L"../../Assets/Textures/Skies/SunnyCubeMap.dds").c_str(), nullptr, skyBox.GetAddressOf());
 
@@ -175,12 +191,20 @@ void Game::CreateBasicGeometry()
 	this->blue.get()->AddSampler("DefaultSampler", samplerState.Get());
 	this->red.get()->AddSampler("DefaultSampler", samplerState.Get());
 
-	this->red.get()->AddTextureSRV("SurfaceTexture", brick.Get());
-	this->green.get()->AddTextureSRV("SurfaceTexture", brick.Get());
-	this->blue.get()->AddTextureSRV("SurfaceTexture", stone.Get());
-	this->red.get()->AddTextureSRV("NormalMap", brickNormal.Get());
-	this->green.get()->AddTextureSRV("NormalMap", brickNormal.Get());
-	this->blue.get()->AddTextureSRV("NormalMap", stoneNormal.Get());
+	this->red.get()->AddTextureSRV("Albedo", bronze.Get());
+	this->red.get()->AddTextureSRV("NormalMap", bronzeNormal.Get());
+	this->red.get()->AddTextureSRV("RoughnessMap", bronzeRoughness.Get());
+	this->red.get()->AddTextureSRV("MetalMap", bronzeMetal.Get());
+
+	this->green.get()->AddTextureSRV("Albedo", bronze.Get());
+	this->green.get()->AddTextureSRV("NormalMap", bronzeNormal.Get());
+	this->green.get()->AddTextureSRV("RoughnessMap", bronzeRoughness.Get());
+	this->green.get()->AddTextureSRV("MetalMap", bronzeMetal.Get());
+
+	this->blue.get()->AddTextureSRV("Albedo", cobblestone.Get());
+	this->blue.get()->AddTextureSRV("NormalMap", cobblestoneNormal.Get());
+	this->blue.get()->AddTextureSRV("RoughnessMap", cobblestoneRoughness.Get());
+	this->blue.get()->AddTextureSRV("MetalMap", cobblestoneMetal.Get());
 
 	this->red.get()->SetUVScale(4.0f);
 
